@@ -40,45 +40,75 @@ To submit your homework:
 
 
 """
-
-
+import traceback
+#returns a string with the sum of the arguments
 def add(*args):
-    """ Returns a STRING with the sum of the arguments """
+    add_numbers = [int(i) for i in args]
+    add_result = str(sum(add_numbers))
 
-    # TODO: Fill sum with the correct value, based on the
-    # args provided.
-    sum = "0"
+    return add_result
 
-    return sum
 
-# TODO: Add functions for handling more arithmetic operations.
+def multiply(*args):
+    multiply_numbers = [int(i) for i in args]
+    multiply_result = str(multiply_numbers[0]*multiply_numbers[1])
+
+    return multiply_result
+
+def subtract(*args):
+    subtract_numbers = [int(i) for i in args]
+    subtract_result = str(subtract_numbers[0]-subtract_numbers[1])
+
+    return subtract_result
+
+def divide(*args):
+    divide_numbers = [int(i) for i in args]
+    divide_result = str(int(divide_numbers[0]/divide_numbers[1]))
+
+    return divide_result
+
 
 def resolve_path(path):
-    """
-    Should return two values: a callable and an iterable of
-    arguments.
-    """
+    routes = {
+        'add': add,
+        'multiply': multiply,
+        'subtract': subtract,
+        'divide': divide,
+    }
 
-    # TODO: Provide correct values for func and args. The
-    # examples provide the correct *syntax*, but you should
-    # determine the actual values of func and args using the
-    # path.
-    func = add
-    args = ['25', '32']
+    path = path.strip('/').split('/')
+    func_name = path.pop(0)
+
+    func = routes.get(func_name)
+    args = path
 
     return func, args
 
 def application(environ, start_response):
-    # TODO: Your application code from the book database
-    # work here as well! Remember that your application must
-    # invoke start_response(status, headers) and also return
-    # the body of the response in BYTE encoding.
-    #
-    # TODO (bonus): Add error handling for a user attempting
-    # to divide by zero.
-    pass
+    headers = [("Content-type", "text/html")]
+    try:
+        path = environ.get('PATH_INFO', None)
+        if path is None:
+            raise NameError
+        func, args = resolve_path(path)
+        body = func(*args)
+        status = "200 OK"
+    except NameError:
+        status = "404 Not Found"
+        body = "<h1> Not Found</h1>"
+    except Exception:
+        status = "500 Internal Server Error"
+        body = "<h1> Internal Server Error</h1>"
+        print(traceback.format_exc())
+    except ZeroDivisionError:
+        status = "400 Bad Request"
+        body = "<h1> Don't Divide by Zero</h1>"
+    finally:
+        headers.append(('Content-length', str(len(body))))
+        start_response(status, headers)
+        return [body.encode('utf8')]
 
 if __name__ == '__main__':
-    # TODO: Insert the same boilerplate wsgiref simple
-    # server creation that you used in the book database.
-    pass
+    from wsgiref.simple_server import make_server
+    srv = make_server('localhost', 8080, application)
+    srv.serve_forever()
