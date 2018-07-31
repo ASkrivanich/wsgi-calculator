@@ -45,28 +45,27 @@ import traceback
 def add(*args):
     add_numbers = [int(i) for i in args]
     add_result = str(sum(add_numbers))
-
     return add_result
-
 
 def multiply(*args):
     multiply_numbers = [int(i) for i in args]
     multiply_result = str(multiply_numbers[0]*multiply_numbers[1])
-
     return multiply_result
 
 def subtract(*args):
     subtract_numbers = [int(i) for i in args]
     subtract_result = str(subtract_numbers[0]-subtract_numbers[1])
-
     return subtract_result
 
 def divide(*args):
     divide_numbers = [int(i) for i in args]
     divide_result = str(int(divide_numbers[0]/divide_numbers[1]))
-
     return divide_result
 
+def index(*args):
+    with open('index.html') as instructions:
+        read_data = instructions.read()
+    return read_data
 
 def resolve_path(path):
     routes = {
@@ -74,6 +73,7 @@ def resolve_path(path):
         'multiply': multiply,
         'subtract': subtract,
         'divide': divide,
+        '': index,
     }
 
     path = path.strip('/').split('/')
